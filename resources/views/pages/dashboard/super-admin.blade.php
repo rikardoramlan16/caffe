@@ -12,7 +12,7 @@
     <div class="app-shell">
         <div class="app-layout">
             <aside class="sidebar">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>CafeFlow</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>CafeFlow</span></a>
                 <nav class="side-nav" aria-label="Navigasi Super Admin">
                     <a class="{{ $section === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard.super-admin') }}">
                         <strong>Dashboard</strong>
@@ -34,6 +34,20 @@
                     </a>
                     <a href="{{ route('admin.inventory.index') }}">
                         <strong>Gudang Stok</strong>
+                    </a>
+
+                    <div style="margin: 15px 12px 5px 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700;">Dashboard Lain</div>
+                    <a href="{{ route('dashboard.admin') }}">
+                        <strong>💼 Admin Toko</strong>
+                    </a>
+                    <a href="{{ route('dashboard.cashier') }}">
+                        <strong>💰 Kasir</strong>
+                    </a>
+                    <a href="{{ route('dashboard.barista') }}">
+                        <strong>☕ Barista</strong>
+                    </a>
+                    <a href="{{ route('dashboard.owner') }}">
+                        <strong>👑 Owner</strong>
                     </a>
 
                     <div style="margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.08);">
@@ -315,14 +329,22 @@
                 <section id="pengaturan-section" data-module="pengaturan">
                     <div class="panel">
                         <h3>Konfigurasi Aplikasi</h3>
-                        <form action="{{ route('super-admin.settings.update') }}" method="POST" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+                        <form action="{{ route('super-admin.settings.update') }}" method="POST" enctype="multipart/form-data" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
                             @csrf
                             <label>Nama Aplikasi<input name="settings[app_name]" value="{{ $settingValue('app_name', config('app.name')) }}" style="width: 100%; margin-top: 6px;"></label>
-                            <label>Mode Aplikasi<input value="{{ config('app.env') }}" disabled style="width: 100%; margin-top: 6px;"></label>
-                            <label>Timezone<input name="settings[timezone]" value="{{ $settingValue('timezone', config('app.timezone')) }}" style="width: 100%; margin-top: 6px;"></label>
                             <label>Service Fee<input name="settings[service_fee]" value="{{ $settingValue('service_fee', '0') }}" style="width: 100%; margin-top: 6px;"></label>
-                            <label>Nama Perusahaan<input name="settings[company_name]" value="{{ $settingValue('company_name') }}" style="width: 100%; margin-top: 6px;"></label>
                             <label>Telepon<input name="settings[company_phone]" value="{{ $settingValue('company_phone') }}" style="width: 100%; margin-top: 6px;"></label>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <label style="margin-bottom: 0;">Logo Aplikasi</label>
+                                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                                    @if ($settingValue('app_logo'))
+                                        <img id="app-logo-preview" src="{{ asset($settingValue('app_logo')) }}" alt="Logo Aplikasi" style="height: 38px; width: 38px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.08); background: var(--bg-app);">
+                                    @else
+                                        <div id="app-logo-preview-placeholder" style="height: 38px; width: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1); font-size: 11px; color: var(--text-muted);">No Logo</div>
+                                    @endif
+                                    <input type="file" name="app_logo" accept="image/*" style="flex: 1; font-size: 13px; color: var(--text-muted);">
+                                </div>
+                            </div>
                             <label style="grid-column: 1 / -1;">Alamat<textarea name="settings[company_address]" rows="3" style="width: 100%; margin-top: 6px;">{{ $settingValue('company_address') }}</textarea></label>
                             <button class="btn btn-primary" type="submit" style="width: max-content;">Simpan Pengaturan</button>
                         </form>

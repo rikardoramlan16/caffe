@@ -6,10 +6,11 @@
         <div class="app-layout">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>Kopi Senja</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>Kopi Senja</span></a>
                 <nav class="side-nav" aria-label="Navigasi Admin">
                     <a href="{{ route('dashboard.admin') }}">📊 Dashboard</a>
                     <a class="{{ $section === 'menu' ? 'active' : '' }}" href="{{ route('admin.menu.index') }}">🍵 Menu Minuman</a>
+                    <a class="{{ $section === 'barang' ? 'active' : '' }}" href="{{ route('admin.menu.index') }}?section=barang">📦 Kelola Barang</a>
                     <a href="{{ route('admin.inventory.index') }}">📦 Gudang Stok</a>
                     <a class="{{ $section === 'kategori' ? 'active' : '' }}" href="{{ route('admin.menu.index') }}?section=kategori">Kategori</a>
                     <a class="{{ $section === 'topping' ? 'active' : '' }}" href="{{ route('admin.menu.index') }}?section=topping">Topping & Add-On</a>
@@ -53,7 +54,65 @@
                 @endif
 
                 <!-- Panels Grid -->
-                <section class="split" style="grid-template-columns: 1.3fr 0.7fr;">
+                <section class="split" style="grid-template-columns: 1fr;">
+                    <!-- Left: Products List -->
+                    <div class="panel" style="{{ $section === 'barang' ? '' : 'display:none;' }}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h3>📦 Daftar Barang (Produk Jadi)</h3>
+                                <p class="muted" style="font-size: 12px; margin-top: 2px;">Kelola stok produk jadi siap jual berserta barcode scanner.</p>
+                            </div>
+                            <button onclick="openAddProductModal()" class="btn btn-gold" style="font-size: 12px; padding: 8px 14px; border: none; cursor: pointer; border-radius: 6px; font-weight: 700; height: 36px;">+ Tambah Barang Baru</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; color: var(--text-main);">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid rgba(255,255,255,0.05); color: var(--text-muted);">
+                                        <th style="padding: 12px 10px;">Nama Barang</th>
+                                        <th style="padding: 12px 10px;">Nomor Barcode</th>
+                                        <th style="padding: 12px 10px;">Harga</th>
+                                        <th style="padding: 12px 10px;">Status</th>
+                                        <th style="padding: 12px 10px; text-align: right;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($products as $p)
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.02);">
+                                            <td style="padding: 12px 10px; font-weight: 700;">
+                                                {{ $p->name }}
+                                                <p class="muted" style="font-size:11px; font-weight:500; margin: 2px 0 0 0;">{{ $p->description ?? 'Produk jadi siap saji/jual.' }}</p>
+                                            </td>
+                                            <td style="padding: 12px 10px; font-family: monospace; font-size: 12px; color: var(--text-gold); font-weight: 700;">🏷️ {{ $p->barcode ?? '-' }}</td>
+                                            <td style="padding: 12px 10px; font-weight: 800; color: #10b981;">Rp {{ number_format($p->price, 0, ',', '.') }}</td>
+                                            <td style="padding: 12px 10px;">
+                                                <form action="{{ route('admin.products.toggle', $p->id) }}" method="POST" style="margin:0;">
+                                                    @csrf
+                                                    <button type="submit" class="pill" style="border:none; cursor:pointer; background: {{ $p->is_available ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)' }}; color: {{ $p->is_available ? '#10b981' : '#ef4444' }}; font-size: 10px; font-weight:800;">
+                                                        {{ $p->is_available ? 'Tersedia' : 'Habis' }}
+                                                    </button>
+                                                </form>
+                                            </td>
+                                            <td style="padding: 12px 10px; text-align: right;">
+                                                <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                                                    <button onclick='openEditProductModal(@json($p))' class="btn" style="font-size: 11px; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--text-gold); color: var(--text-gold); cursor: pointer; height: 28px; min-height: unset; background: none;">Edit</button>
+                                                    <form action="{{ route('admin.products.destroy', $p->id) }}" method="POST" style="margin: 0; display: inline;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; height: 28px; min-height: unset;" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">Hapus</button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="muted" style="text-align: center; padding: 40px;">Belum ada data barang. Silakan tambah barang baru.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <!-- Left: Menu Table list -->
                     <div class="panel" style="{{ $section === 'menu' ? '' : 'display:none;' }}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -478,5 +537,119 @@
                 row.querySelector('select').value = inventoryId;
             }
         }
+
+        // Modal Add Product
+        function openAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'flex';
+        }
+        function closeAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'none';
+        }
+
+        // Modal Edit Product
+        function openEditProductModal(product) {
+            document.getElementById('edit_product_name').value = product.name;
+            document.getElementById('edit_product_price').value = product.price;
+            document.getElementById('edit_product_barcode').value = product.barcode || '';
+            document.getElementById('edit_product_available').value = product.is_available ? '1' : '0';
+            document.getElementById('edit_product_featured').value = product.is_featured ? '1' : '0';
+            document.getElementById('edit_product_desc').value = product.description || '';
+            
+            const form = document.getElementById('edit-product-form');
+            form.action = `/admin/products/${product.id}/update`;
+            
+            document.getElementById('edit-product-modal').style.display = 'flex';
+        }
+        function closeEditProductModal() {
+            document.getElementById('edit-product-modal').style.display = 'none';
+        }
     </script>
+
+    <!-- Modal 3: Add Product -->
+    <div id="add-product-modal" style="position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="panel" style="width: min(500px, 92%); padding: 24px; display: flex; flex-direction: column; gap: 14px; position:relative;">
+            <h3>📝 Tambah Barang Baru</h3>
+            <button onclick="closeAddProductModal()" style="position:absolute; right:20px; top:20px; background:none; border:none; font-size:18px; color:var(--text-muted); cursor:pointer;">✕</button>
+            
+            <form action="{{ route('admin.products.store') }}" method="POST" style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+                @csrf
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label for="product_name" style="font-size: 12px; font-weight: 600;">Nama Barang</label>
+                        <input type="text" id="product_name" name="name" required placeholder="misal: Coca Cola" style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label for="product_barcode" style="font-size: 12px; font-weight: 600;">Nomor Barcode (Opsional)</label>
+                        <input type="text" id="product_barcode" name="barcode" placeholder="Scan atau ketik barcode..." style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label for="product_price" style="font-size: 12px; font-weight: 600;">Harga (Rupiah)</label>
+                    <input type="number" id="product_price" name="price" required placeholder="misal: 10000" style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label for="product_desc" style="font-size: 12px; font-weight: 600;">Deskripsi</label>
+                    <textarea id="product_desc" name="description" placeholder="Keterangan barang..." style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px; height: 70px; resize:none; outline:none;"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-gold" style="padding: 12px; font-weight: 700; border: none; cursor: pointer; border-radius: 6px; margin-top: 10px;">Simpan Barang Baru</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Edit Product -->
+    <div id="edit-product-modal" style="position: fixed; top: 0; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="panel" style="width: min(500px, 92%); padding: 24px; display: flex; flex-direction: column; gap: 14px; position:relative;">
+            <h3>📝 Edit Barang Produk</h3>
+            <button onclick="closeEditProductModal()" style="position:absolute; right:20px; top:20px; background:none; border:none; font-size:18px; color:var(--text-muted); cursor:pointer;">✕</button>
+            
+            <form id="edit-product-form" method="POST" style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+                @csrf
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 12px; font-weight: 600;">Nama Barang</label>
+                        <input type="text" id="edit_product_name" name="name" required style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 12px; font-weight: 600;">Nomor Barcode (Opsional)</label>
+                        <input type="text" id="edit_product_barcode" name="barcode" placeholder="Scan atau ketik barcode..." style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 12px; font-weight: 600;">Harga (Rupiah)</label>
+                        <input type="number" id="edit_product_price" name="price" required style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 12px; font-weight: 600;">Ketersediaan</label>
+                        <select id="edit_product_available" name="is_available" required style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                            <option value="1">Tersedia</option>
+                            <option value="0">Habis</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="font-size: 12px; font-weight: 600;">Status Rekomendasi</label>
+                        <select id="edit_product_featured" name="is_featured" required style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px;">
+                            <option value="0">Biasa</option>
+                            <option value="1">Best Seller / Unggulan</option>
+                        </select>
+                    </div>
+                    <div></div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="font-size: 12px; font-weight: 600;">Deskripsi</label>
+                    <textarea id="edit_product_desc" name="description" style="padding: 10px 14px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px; height: 70px; resize:none; outline:none;"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-gold" style="padding: 12px; font-weight: 700; border: none; cursor: pointer; border-radius: 6px; margin-top: 10px;">Simpan Perubahan Barang</button>
+            </form>
+        </div>
+    </div>
 </x-layouts.app>

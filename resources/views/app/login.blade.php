@@ -3,8 +3,14 @@
         <div class="panel" style="width: 100%; max-width: 420px; padding: 40px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.12); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); margin: 20px;">
             <div style="text-align: center; margin-bottom: 30px;">
                 <a class="brand" href="{{ route('landing') }}" style="display: inline-flex; font-size: 24px; font-weight: 700; text-decoration: none; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span class="brand-mark" style="background: var(--text-gold); color: var(--bg-app); border-radius: 6px; padding: 2px 8px; font-weight: 800; font-size: 16px;">CF</span>
-                    <span style="color: var(--text-main);">CafeFlow</span>
+                    <span class="brand-mark">
+                        @if(!empty($appLogo))
+                            <img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">
+                        @else
+                            CF
+                        @endif
+                    </span>
+                    <span style="color: var(--text-main);">{{ $appName ?? 'CafeFlow' }}</span>
                 </a>
                 <span class="eyebrow" style="display: block; margin-top: 8px; color: var(--text-gold);">Internal Staff Access</span>
                 <h1 style="font-size: 28px; font-weight: 800; margin: 8px 0 4px 0; color: var(--text-main);">Masuk Sistem</h1>

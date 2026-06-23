@@ -3,14 +3,14 @@
         <div class="app-layout">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>Kopi Senja</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>Kopi Senja</span></a>
                 <nav class="side-nav" aria-label="Navigasi Staf">
                     @if ($authUser['role'] === 'kasir')
                         <a href="{{ route('dashboard.cashier') }}">🏠 Dashboard</a>
                     @else
                         <a href="{{ route('dashboard.barista') }}">🏠 Dashboard</a>
                     @endif
-                    <a href="{{ route('staff.profile') }}">👤 Profil Saya</a>
+                    <a href="{{ route('profil') }}">👤 Profil Saya</a>
                     <a class="active" href="{{ route('staff.attendance') }}">📅 Absensi Saya</a>
                     <a href="{{ route('staff.payroll') }}">💵 Slip Gaji</a>
                     <div style="margin-top:auto;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05);">

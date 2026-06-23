@@ -11,10 +11,11 @@
     <div class="app-shell">
         <div class="app-layout">
             <aside class="sidebar">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>CafeFlow</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>CafeFlow</span></a>
                 <nav class="side-nav" aria-label="Navigasi Admin">
                     <a class="{{ $section === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard.admin') }}">📊 Dashboard</a>
                     <a href="{{ route('admin.menu.index') }}">🍵 Menu Minuman</a>
+                    <a href="{{ route('admin.menu.index') }}?section=barang">📦 Kelola Barang</a>
                     <a href="{{ route('admin.menu.index') }}?section=kategori">📁 Kategori</a>
                     <a href="{{ route('admin.menu.index') }}?section=topping">🍬 Topping</a>
                     <a class="{{ $section === 'meja' ? 'active' : '' }}" href="{{ route('dashboard.admin.section', 'meja') }}">🪑 Meja Cafe</a>

@@ -5,7 +5,7 @@
                 <div class="mobile-top" style="background: var(--coffee-deep); color: white; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;">
                     <div>
                         <a class="brand" href="{{ route('landing') }}" style="display: flex; align-items: center; gap: 8px;">
-                            <span class="brand-mark" style="width: 32px; height: 32px; font-size: 14px;">CF</span>
+                            <span class="brand-mark" style="width: 32px; height: 32px; font-size: 14px;">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span>
                             <span style="font-size: 14px; font-weight: 800; color: white;">Status Pesanan</span>
                         </a>
                     </div>

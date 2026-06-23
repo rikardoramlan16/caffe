@@ -23,11 +23,13 @@ use Illuminate\View\View;
 
 class CustomerOrderController extends Controller
 {
-    /**
-     * Menu Preview (Publik)
-     */
-    public function publicPreview(Request $request): View
+    public function publicPreview(Request $request)
     {
+        $tableCode = $request->session()->get('customer_table_code');
+        if ($tableCode) {
+            return redirect()->route('qr.login', ['code' => $tableCode]);
+        }
+
         $categories = Category::where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $menuItems = Menu::with(['category', 'toppings' => fn ($query) => $query->where('is_available', true)])
             ->where('is_available', true)
@@ -260,7 +262,7 @@ class CustomerOrderController extends Controller
             ];
         }
 
-        $serviceFee = 8000;
+        $serviceFee = intval(\App\Models\Setting::where('key', 'service_fee')->first()?->value ?? 0);
         $total = $subtotal + $serviceFee;
 
         $invoiceNumber = 'INV-' . now()->format('ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);

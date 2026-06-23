@@ -365,7 +365,7 @@
         <header class="topbar">
             <div class="container nav">
                 <a class="brand font-display" href="#">
-                    <span class="brand-mark">☕</span>
+                    <span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else ☕ @endif</span>
                     <span style="font-size: 20px; font-weight: 800; tracking: -0.5px;">CafeFlow</span>
                 </a>
                 
@@ -705,7 +705,7 @@
             <div class="container" style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 40px;">
                 <div>
                     <a class="brand font-display" href="#" style="margin-bottom: 16px;">
-                        <span class="brand-mark">☕</span>
+                        <span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else ☕ @endif</span>
                         <span style="font-size: 18px; font-weight: 800; color: var(--c-coffee-dark);">CafeFlow</span>
                     </a>
                     <p class="muted" style="font-size: 13px; line-height: 1.6; margin-top: 12px; max-width: 280px;">
@@ -737,10 +737,10 @@
                 <div>
                     <h4 class="font-display" style="font-size: 14px; font-weight: 800; margin: 0 0 16px 0; color: var(--c-coffee-dark);">Kontak & Alamat</h4>
                     <p class="muted" style="font-size: 13px; line-height: 1.6; margin: 0 0 12px 0;">
-                        📍 Jl. Kopi Senja Kemang No. 22, Mampang Prapatan, Jakarta Selatan.
+                        📍 {{ !empty($companyAddress) ? $companyAddress : 'Jl. Kopi Senja Kemang No. 22, Mampang Prapatan, Jakarta Selatan.' }}
                     </p>
                     <p class="muted" style="font-size: 13px; margin: 0;">
-                        📞 +62 812-3456-7890
+                        📞 {{ !empty($companyPhone) ? $companyPhone : '+62 812-3456-7890' }}
                     </p>
                     <p class="muted" style="font-size: 13px; margin: 4px 0 0 0;">
                         ✉️ hello@cafeflow.test

@@ -5,7 +5,7 @@
     <div class="app-shell">
         <div class="app-layout">
             <aside class="sidebar">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>CafeFlow</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>CafeFlow</span></a>
                 <nav class="side-nav" aria-label="Navigasi Barista">
                     <a class="{{ $section === 'dashboard' ? 'active' : '' }}" href="{{ route('dashboard.barista') }}">📊 Dashboard</a>
                     <a class="{{ $section === 'queue-paid' ? 'active' : '' }}" href="{{ route('dashboard.barista.section', 'queue-paid') }}">📥 Queue Pesanan PAID</a>
@@ -13,7 +13,7 @@
                     <a class="{{ $section === 'riwayat' ? 'active' : '' }}" href="{{ route('dashboard.barista.section', 'riwayat') }}">🕒 Riwayat Produksi</a>
                     <a href="{{ route('admin.inventory.index') }}">📦 Ketersediaan Stok</a>
                     <div style="margin: 10px 0; border-top: 1px solid rgba(255,255,255,0.05);"></div>
-                    <a href="{{ route('staff.profile') }}">👤 Profil Saya</a>
+                    <a href="{{ route('profil') }}">👤 Profil Saya</a>
                     <a href="{{ route('staff.attendance') }}">📅 Absensi Saya</a>
                     <a href="{{ route('staff.payroll') }}">💵 Slip Gaji</a>
 
@@ -90,15 +90,41 @@
 
                         <div style="display: flex; flex-direction: column; gap: 14px; max-height: 550px; overflow-y: auto;">
                             @forelse ($paidOrders as $order)
+                                @php
+                                    // Construct the speech text for the full order in Indonesian
+                                    $speechParts = [];
+                                    $speechParts[] = "Pesanan Meja " . ($order->table ? $order->table->code : 'tanpa nomor');
+                                    foreach ($order->items as $item) {
+                                        $menuName = $item->menu ? $item->menu->name : ($item->product ? $item->product->name : 'item');
+                                        $qty = $item->quantity;
+                                        $itemText = "{$qty} {$menuName}";
+                                        if ($item->note) {
+                                            $itemText .= ", dengan catatan {$item->note}";
+                                        }
+                                        $speechParts[] = $itemText;
+                                    }
+                                    if ($order->customer_note) {
+                                        $speechParts[] = "Catatan tambahan: {$order->customer_note}";
+                                    }
+                                    $fullSpeechText = implode('. ', $speechParts);
+                                @endphp
                                 <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); padding: 14px; border-radius: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 6px; margin-bottom: 8px;">
-                                        <strong>{{ $order->invoice_number }} · Meja {{ $order->table ? $order->table->code : 'N/A' }}</strong>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <strong>{{ $order->invoice_number }} · Meja {{ $order->table ? $order->table->code : 'N/A' }}</strong>
+                                            <button type="button" class="speaker-btn" onclick="speakText('{{ addslashes($fullSpeechText) }}', this)" title="Putar Suara Detail Pesanan" style="background: none; border: none; color: var(--text-gold); cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; transition: background-color 0.2s;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
                                         <span style="font-size: 11px; color: var(--text-muted);">{{ $order->created_at->format('H:i') }}</span>
                                     </div>
                                     <div style="font-size: 13px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
                                         @foreach ($order->items as $item)
-                                            <div style="display: flex; justify-content: space-between;">
-                                                <span>• {{ $item->menu ? $item->menu->name : 'Item' }} <strong style="color: var(--text-gold);">x{{ $item->quantity }}</strong></span>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                                <span>• {{ $item->menu ? $item->menu->name : ($item->product ? $item->product->name : 'Item') }} <strong style="color: var(--text-gold);">x{{ $item->quantity }}</strong></span>
                                                 @if ($item->note)
                                                     <span class="muted" style="font-size: 11px; font-style: italic;">({{ $item->note }})</span>
                                                 @endif
@@ -136,15 +162,41 @@
 
                         <div style="display: flex; flex-direction: column; gap: 14px; max-height: 550px; overflow-y: auto;">
                             @forelse ($makingOrders as $order)
+                                @php
+                                    // Construct the speech text for the full order in Indonesian
+                                    $speechParts = [];
+                                    $speechParts[] = "Pesanan Meja " . ($order->table ? $order->table->code : 'tanpa nomor');
+                                    foreach ($order->items as $item) {
+                                        $menuName = $item->menu ? $item->menu->name : ($item->product ? $item->product->name : 'item');
+                                        $qty = $item->quantity;
+                                        $itemText = "{$qty} {$menuName}";
+                                        if ($item->note) {
+                                            $itemText .= ", dengan catatan {$item->note}";
+                                        }
+                                        $speechParts[] = $itemText;
+                                    }
+                                    if ($order->customer_note) {
+                                        $speechParts[] = "Catatan tambahan: {$order->customer_note}";
+                                    }
+                                    $fullSpeechText = implode('. ', $speechParts);
+                                @endphp
                                 <div style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.03); padding: 14px; border-radius: 8px; border-left: 3px solid var(--text-gold);">
                                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 6px; margin-bottom: 8px;">
-                                        <strong>{{ $order->invoice_number }} · Meja {{ $order->table ? $order->table->code : 'N/A' }}</strong>
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <strong>{{ $order->invoice_number }} · Meja {{ $order->table ? $order->table->code : 'N/A' }}</strong>
+                                            <button type="button" class="speaker-btn" onclick="speakText('{{ addslashes($fullSpeechText) }}', this)" title="Putar Suara Detail Pesanan" style="background: none; border: none; color: var(--text-gold); cursor: pointer; padding: 4px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; transition: background-color 0.2s;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
                                         <span style="font-size: 11px; color: var(--text-muted);">Mulai: {{ $order->updated_at->format('H:i') }}</span>
                                     </div>
                                     <div style="font-size: 13px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
                                         @foreach ($order->items as $item)
-                                            <div style="display: flex; justify-content: space-between;">
-                                                <span>• {{ $item->menu ? $item->menu->name : 'Item' }} <strong style="color: var(--text-gold);">x{{ $item->quantity }}</strong></span>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                                <span>• {{ $item->menu ? $item->menu->name : ($item->product ? $item->product->name : 'Item') }} <strong style="color: var(--text-gold);">x{{ $item->quantity }}</strong></span>
                                                 @if ($item->note)
                                                     <span class="muted" style="font-size: 11px; font-style: italic;">({{ $item->note }})</span>
                                                 @endif
@@ -195,7 +247,7 @@
                                         <td style="padding: 10px;">Meja {{ $done->table ? $done->table->code : 'N/A' }}</td>
                                         <td style="padding: 10px;">
                                             @foreach ($done->items as $item)
-                                                <span>{{ $item->menu ? $item->menu->name : 'Item' }} (x{{ $item->quantity }}){{ !$loop->last ? ', ' : '' }}</span>
+                                                <span>{{ $item->menu ? $item->menu->name : ($item->product ? $item->product->name : 'Item') }} (x{{ $item->quantity }}){{ !$loop->last ? ', ' : '' }}</span>
                                             @endforeach
                                         </td>
                                         <td style="padding: 10px; color: var(--text-muted);">{{ $done->updated_at->format('H:i') }}</td>
@@ -231,5 +283,74 @@
                 document.getElementById('riwayat')?.style.setProperty('display', 'none');
             }
         });
+
+        // Text to Speech Functionality
+        let activeSpeakerBtn = null;
+
+        function speakText(text, btn) {
+            if (!('speechSynthesis' in window)) {
+                alert('Browser Anda tidak mendukung fitur Text to Speech (SpeechSynthesis).');
+                return;
+            }
+
+            // Stop speaking if already active
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                if (activeSpeakerBtn) {
+                    activeSpeakerBtn.classList.remove('speaking-pulse');
+                    activeSpeakerBtn.style.color = 'var(--text-gold)';
+                }
+                
+                // If clicked button was the active one, just toggle off
+                if (activeSpeakerBtn === btn) {
+                    activeSpeakerBtn = null;
+                    return;
+                }
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            
+            utterance.onstart = () => {
+                activeSpeakerBtn = btn;
+                btn.classList.add('speaking-pulse');
+                btn.style.color = '#ef4444';
+            };
+
+            utterance.onend = () => {
+                btn.classList.remove('speaking-pulse');
+                btn.style.color = 'var(--text-gold)';
+                if (activeSpeakerBtn === btn) {
+                    activeSpeakerBtn = null;
+                }
+            };
+
+            utterance.onerror = () => {
+                btn.classList.remove('speaking-pulse');
+                btn.style.color = 'var(--text-gold)';
+                if (activeSpeakerBtn === btn) {
+                    activeSpeakerBtn = null;
+                }
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
     </script>
+
+    <style>
+        @keyframes speakPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .speaking-pulse {
+            animation: speakPulse 1.2s infinite ease-in-out;
+            background-color: rgba(239, 68, 68, 0.1) !important;
+            border-radius: 50% !important;
+        }
+        .speaker-btn:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+    </style>
 </x-layouts.app>

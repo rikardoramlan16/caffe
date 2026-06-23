@@ -3,7 +3,7 @@
         <div class="mobile-stage">
             <div class="mobile-app">
                 <div class="mobile-top">
-                    <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>Kopi Senja Menu</span></a>
+                    <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>Kopi Senja Menu</span></a>
                     <button class="btn btn-icon" type="button" data-theme-toggle title="Ganti tema">◐</button>
                 </div>
 

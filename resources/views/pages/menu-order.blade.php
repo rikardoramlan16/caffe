@@ -5,7 +5,7 @@
                 <div class="mobile-top" style="background: var(--coffee-deep); color: white; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;">
                     <div>
                         <a class="brand" href="{{ route('landing') }}" style="display: flex; align-items: center; gap: 8px;">
-                            <span class="brand-mark" style="width: 32px; height: 32px; font-size: 14px;">CF</span>
+                            <span class="brand-mark" style="width: 32px; height: 32px; font-size: 14px;">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span>
                             <span style="font-size: 14px; font-weight: 800; color: white;">Kopi Senja</span>
                         </a>
                     </div>
@@ -200,7 +200,17 @@
             <!-- Notes -->
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 <label for="modal-item-note" style="font-size: 12px; font-weight: 700; color: var(--text-gold);">CATATAN</label>
-                <input type="text" id="modal-item-note" placeholder="Tulis instruksi tambahan..." style="width: 100%; padding: 10px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px; outline: none;">
+                <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <input type="text" id="modal-item-note" placeholder="Tulis instruksi tambahan..." style="width: 100%; padding: 10px 40px 10px 10px; border-radius: 6px; background: var(--bg-app); border: 1px solid rgba(255,255,255,0.08); color: var(--text-main); font-size: 13px; outline: none;">
+                    <button type="button" id="start-voice-btn" style="position: absolute; right: 8px; background: none; border: none; color: var(--text-gold); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; width: 28px; height: 28px; transition: background-color 0.2s;" onclick="toggleVoiceRecognition(event)" title="Gunakan Voice to Text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Quantity Selector & Action Button -->
@@ -228,17 +238,20 @@
         let currentItem = null;
         let cart = [];
         const sizePrices = { Regular: 0, Large: 3000 };
-        const menuCustomizationData = @json($menu->mapWithKeys(fn ($item) => [$item->id => [
-            'id' => $item->id,
-            'name' => $item->name,
-            'description' => $item->description,
-            'price' => $item->price,
-            'toppings' => $item->toppings->map(fn ($topping) => [
-                'id' => $topping->id,
-                'name' => $topping->name,
-                'price' => $topping->price,
-            ])->values(),
-        ]]));
+        @php
+            $menuCustomizationData = $menu->mapWithKeys(fn ($item) => [$item->id => [
+                'id' => $item->id,
+                'name' => $item->name,
+                'description' => $item->description,
+                'price' => $item->price,
+                'toppings' => $item->toppings->map(fn ($topping) => [
+                    'id' => $topping->id,
+                    'name' => $topping->name,
+                    'price' => $topping->price,
+                ])->values(),
+            ]]);
+        @endphp
+        const menuCustomizationData = @json($menuCustomizationData);
 
         document.addEventListener('DOMContentLoaded', () => {
             // Load cart
@@ -478,6 +491,87 @@
                 alert('Gagal menyambung ke server.');
             });
         }
+
+        // Voice to Text Feature
+        let recognition = null;
+        let isRecording = false;
+
+        function toggleVoiceRecognition(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!window.SpeechRecognition) {
+                alert('Browser Anda tidak mendukung fitur Voice to Text (Web Speech API). Harap gunakan Google Chrome atau Safari.');
+                return;
+            }
+
+            const voiceBtn = document.getElementById('start-voice-btn');
+            const noteInput = document.getElementById('modal-item-note');
+
+            if (!recognition) {
+                recognition = new window.SpeechRecognition();
+                recognition.lang = 'id-ID';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    if (voiceBtn) {
+                        voiceBtn.style.color = '#ef4444';
+                        voiceBtn.classList.add('recording-pulse');
+                    }
+                    if (noteInput) {
+                        noteInput.placeholder = 'Mendengarkan... Bicara sekarang.';
+                    }
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    if (noteInput) {
+                        if (noteInput.value) {
+                            noteInput.value += ' ' + transcript;
+                        } else {
+                            noteInput.value = transcript;
+                        }
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    stopVoiceRecognition();
+                    if (event.error === 'not-allowed') {
+                        alert('Akses mikrofon ditolak. Harap izinkan akses mikrofon di pengaturan browser Anda.');
+                    }
+                };
+
+                recognition.onend = () => {
+                    stopVoiceRecognition();
+                };
+            }
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        function stopVoiceRecognition() {
+            isRecording = false;
+            const voiceBtn = document.getElementById('start-voice-btn');
+            const noteInput = document.getElementById('modal-item-note');
+            if (voiceBtn) {
+                voiceBtn.style.color = 'var(--text-gold)';
+                voiceBtn.classList.remove('recording-pulse');
+            }
+            if (noteInput) {
+                noteInput.placeholder = 'Tulis instruksi tambahan...';
+            }
+        }
     </script>
 
     <style>
@@ -493,6 +587,15 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.15); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .recording-pulse {
+            animation: pulse 1.5s infinite ease-in-out;
+            background-color: rgba(239, 68, 68, 0.1);
         }
         .hide-scrollbar::-webkit-scrollbar {
             display: none;

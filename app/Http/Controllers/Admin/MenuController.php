@@ -23,10 +23,25 @@ class MenuController extends Controller
         $user = $request->session()->get('auth_user');
         $branchId = $user['branch_id'] ?? null;
 
-        $menus = Menu::with(['category', 'toppings'])->where('branch_id', $branchId)->latest()->get();
-        $categories = Category::where('branch_id', $branchId)->orderBy('sort_order', 'asc')->get();
-        $toppings = Topping::with(['inventory', 'menus'])->where('branch_id', $branchId)->get();
+        $menusQuery = Menu::with(['category', 'toppings']);
+        $categoriesQuery = Category::orderBy('sort_order', 'asc');
+        $toppingsQuery = Topping::with(['inventory', 'menus']);
+
+        if ($branchId) {
+            $menusQuery->where('branch_id', $branchId);
+            $categoriesQuery->where('branch_id', $branchId);
+            $toppingsQuery->where('branch_id', $branchId);
+        }
+
+        $menus = $menusQuery->latest()->get();
+        $categories = $categoriesQuery->get();
+        $toppings = $toppingsQuery->get();
         $inventories = Inventory::all(); // Load raw materials for recipe config
+        $productsQuery = \App\Models\Product::query();
+        if ($branchId) {
+            $productsQuery->where('branch_id', $branchId);
+        }
+        $products = $productsQuery->latest()->get();
 
         // Fetch recipes mapped by menu_id
         $recipes = MenuRecipe::with('inventory')
@@ -40,6 +55,7 @@ class MenuController extends Controller
             'toppings' => $toppings,
             'inventories' => $inventories,
             'recipes' => $recipes,
+            'products' => $products,
         ]);
     }
 
@@ -61,7 +77,7 @@ class MenuController extends Controller
         unset($data['toppings']);
 
         $menu = Menu::create($data + [
-            'branch_id' => $request->session()->get('auth_user.branch_id'),
+            'branch_id' => $request->session()->get('auth_user.branch_id') ?: (\App\Models\Branch::first()?->id),
             'is_available' => true,
             'image_path' => 'images/cafe/customer-page.svg'
         ]);
@@ -125,7 +141,7 @@ class MenuController extends Controller
         ]);
 
         Category::create($data + [
-            'branch_id' => $request->session()->get('auth_user.branch_id'),
+            'branch_id' => $request->session()->get('auth_user.branch_id') ?: (\App\Models\Branch::first()?->id),
             'is_active' => true
         ]);
 
@@ -151,7 +167,7 @@ class MenuController extends Controller
         $data['inventory_quantity'] = $data['inventory_quantity'] ?? 1;
 
         $topping = Topping::create($data + [
-            'branch_id' => $request->session()->get('auth_user.branch_id'),
+            'branch_id' => $request->session()->get('auth_user.branch_id') ?: (\App\Models\Branch::first()?->id),
             'is_available' => true,
             'inventory_quantity' => $data['inventory_quantity'] ?? 1,
         ]);

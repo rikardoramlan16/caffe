@@ -3,7 +3,7 @@
         <div class="mobile-stage">
             <div class="mobile-app">
                 <div class="mobile-top">
-                    <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span id="table-label">Meja A1</span></a>
+                    <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span id="table-label">Meja A1</span></a>
                     <button class="btn btn-icon" type="button" data-theme-toggle title="Ganti tema">◐</button>
                 </div>
                 
@@ -42,7 +42,7 @@
                                 </div>
                                 <div class="order-row" style="display:flex; justify-content:space-between; margin-bottom: 8px;">
                                     <span style="color: var(--text-muted);">Biaya Layanan</span>
-                                    <strong style="color: var(--text-main);">Rp 8.000</strong>
+                                    <strong style="color: var(--text-main);">Rp {{ number_format($serviceFee, 0, ',', '.') }}</strong>
                                 </div>
                                 <div class="order-row" style="display:flex; justify-content:space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; margin-top: 10px; font-size: 16px;">
                                     <span style="font-weight: 700; color: var(--text-main);">Total</span>
@@ -410,7 +410,7 @@
             });
             
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const serviceFee = 8000;
+            const serviceFee = {{ $serviceFee }};
             const total = subtotal + serviceFee;
             
             document.getElementById('subtotal-val').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;

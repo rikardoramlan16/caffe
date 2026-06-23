@@ -148,6 +148,25 @@ class DatabaseSeeder extends Seeder
             'image_path' => 'images/cafe/customer-page.svg',
             'is_available' => true,
             'is_featured' => $menu[4],
+            'barcode' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]));
+
+        // Seed Products (Barang Jadi)
+        collect([
+            ['Coca Cola', '8992689100010', 10000, 'Minuman bersoda Coca Cola dingin.'],
+            ['Fanta Strawberry', '8992689100027', 10000, 'Minuman bersoda Fanta Strawberry dingin.'],
+            ['Aqua Botol 600ml', '8992689100034', 5000, 'Air mineral Aqua botol dingin.'],
+            ['Kerupuk Kaleng', '8992689100041', 3000, 'Kerupuk putih renyah tradisional.'],
+        ])->map(fn (array $prod) => DB::table('products')->insertGetId([
+            'branch_id' => $branches[0],
+            'name' => $prod[0],
+            'barcode' => $prod[1],
+            'price' => $prod[2],
+            'description' => $prod[3],
+            'is_available' => true,
+            'is_featured' => false,
             'created_at' => now(),
             'updated_at' => now(),
         ]));
@@ -573,7 +592,23 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 15. General Settings and Activity Logs
-        foreach (['app_name' => 'CafeFlow', 'theme' => 'coffee-premium', 'payment_methods' => 'QRIS,Cash,Debit'] as $key => $value) {
+        $logoPath = null;
+        $logoFiles = glob(public_path('logos/*.*'));
+        if (!empty($logoFiles)) {
+            $logoPath = 'logos/' . basename($logoFiles[0]);
+        }
+
+        $defaultSettings = [
+            'app_name' => 'CafeFlow',
+            'theme' => 'coffee-premium',
+            'payment_methods' => 'QRIS,Cash,Debit',
+        ];
+
+        if ($logoPath) {
+            $defaultSettings['app_logo'] = $logoPath;
+        }
+
+        foreach ($defaultSettings as $key => $value) {
             DB::table('settings')->insert([
                 'key' => $key,
                 'value' => $value,

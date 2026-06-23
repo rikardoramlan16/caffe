@@ -2,7 +2,7 @@
     <div class="app-shell">
         <header class="topbar">
             <div class="container nav">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>CafeFlow</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>CafeFlow</span></a>
                 <nav class="nav-links" aria-label="Navigasi utama">
                     <a href="{{ route('landing') }}">Home</a>
                     <a href="{{ route('menu.preview') }}">Menu</a>
@@ -51,7 +51,7 @@
 
         <footer class="footer" style="margin-top: 80px;">
             <div class="container nav">
-                <span class="brand"><span class="brand-mark">CF</span><span>CafeFlow</span></span>
+                <span class="brand"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>CafeFlow</span></span>
                 <span>© 2026 Kopi Senja. All rights reserved.</span>
             </div>
         </footer>

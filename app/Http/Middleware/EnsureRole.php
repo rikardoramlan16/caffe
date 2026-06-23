@@ -16,6 +16,11 @@ class EnsureRole
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
+        // Super Admin bypasses all dashboard role checks
+        if ($user['role'] === 'super_admin') {
+            return $next($request);
+        }
+
         if ($roles !== [] && ! in_array($user['role'], $roles, true)) {
             abort(403);
         }

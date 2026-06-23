@@ -10,6 +10,7 @@ use App\Models\EmployeeLeave;
 use App\Models\SystemLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 
 class StaffPortalController extends Controller
@@ -23,7 +24,27 @@ class StaffPortalController extends Controller
         if (!$authUser) {
             return null;
         }
-        return Employee::with('branch')->where('user_id', $authUser['id'])->first();
+        
+        $employee = Employee::with('branch')->where('user_id', $authUser['id'])->first();
+        if (!$employee) {
+            $user = \App\Models\User::find($authUser['id']);
+            if ($user) {
+                $employee = Employee::create([
+                    'user_id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => '08123456789',
+                    'address' => 'Bandung, Indonesia',
+                    'joined_at' => now(),
+                    'role' => $user->role,
+                    'branch_id' => $user->branch_id ?? \App\Models\Branch::first()?->id,
+                    'basic_salary' => 3500000,
+                    'status' => 'active',
+                ]);
+                $employee = Employee::with('branch')->find($employee->id);
+            }
+        }
+        return $employee;
     }
 
     /**
@@ -261,5 +282,112 @@ class StaffPortalController extends Controller
         });
 
         return back()->with('success', 'Pengajuan cuti berhasil diajukan dan sedang menunggu persetujuan.');
+    }
+
+    /**
+     * Change staff user password.
+     */
+    public function changePassword(Request $request)
+    {
+        $authUser = $request->session()->get('auth_user');
+        if (!$authUser) {
+            return back()->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        $request->validate([
+            'current_password' => ['required'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user = \App\Models\User::find($authUser['id']);
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->with('error', 'Password saat ini salah.');
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        SystemLog::create([
+            'level' => 'info',
+            'source' => 'StaffPortalController@changePassword',
+            'message' => "Karyawan '{$user->name}' mengubah password mereka.",
+            'context' => ['user_id' => $user->id],
+        ]);
+
+        return back()->with('success', 'Password berhasil diubah.');
+    }
+
+    /**
+     * Register or update face descriptor.
+     */
+    public function registerFace(Request $request)
+    {
+        $authUser = $request->session()->get('auth_user');
+        if (!$authUser) {
+            return response()->json(['success' => false, 'message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
+        $request->validate([
+            'descriptor' => ['required', 'string'],
+        ]);
+
+        $user = \App\Models\User::find($authUser['id']);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User tidak ditemukan.'], 404);
+        }
+
+        $descriptorArray = json_decode($request->descriptor, true);
+        if (!is_array($descriptorArray) || count($descriptorArray) !== 128) {
+            return response()->json(['success' => false, 'message' => 'Format deskriptor wajah tidak valid.'], 400);
+        }
+
+        $user->update([
+            'face_descriptor' => $request->descriptor,
+        ]);
+
+        SystemLog::create([
+            'level' => 'info',
+            'source' => 'StaffPortalController@registerFace',
+            'message' => "Karyawan '{$user->name}' mendaftarkan wajah baru.",
+            'context' => ['user_id' => $user->id],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pendaftaran wajah berhasil disimpan.'
+        ]);
+    }
+
+    /**
+     * Delete registered face.
+     */
+    public function deleteFace(Request $request)
+    {
+        $authUser = $request->session()->get('auth_user');
+        if (!$authUser) {
+            return response()->json(['success' => false, 'message' => 'Silakan login terlebih dahulu.'], 401);
+        }
+
+        $user = \App\Models\User::find($authUser['id']);
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User tidak ditemukan.'], 404);
+        }
+
+        $user->update([
+            'face_descriptor' => null,
+        ]);
+
+        SystemLog::create([
+            'level' => 'info',
+            'source' => 'StaffPortalController@deleteFace',
+            'message' => "Karyawan '{$user->name}' menghapus pendaftaran wajah.",
+            'context' => ['user_id' => $user->id],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pendaftaran wajah berhasil dihapus.'
+        ]);
     }
 }

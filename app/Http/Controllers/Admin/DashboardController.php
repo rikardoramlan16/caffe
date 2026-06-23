@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Category;
 use App\Models\CafeTable;
 use App\Models\Menu;
+use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -24,6 +25,7 @@ use App\Models\Inventory;
 use App\Models\InventoryTransaction;
 use App\Models\Supplier;
 use App\Models\PurchaseOrder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -31,6 +33,28 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    private function resolveBranchId(Request $request): ?int
+    {
+        $user = $request->session()->get('auth_user');
+        if (! $user) {
+            return null;
+        }
+
+        $branchId = $user['branch_id'] ?? null;
+        if ($branchId) {
+            return (int) $branchId;
+        }
+
+        if (! empty($user['id'])) {
+            $dbBranchId = (int) (User::find($user['id'])?->branch_id ?? 0);
+            if ($dbBranchId) {
+                return $dbBranchId;
+            }
+        }
+
+        return (int) (\App\Models\Branch::first()?->id ?? 0) ?: null;
+    }
+
     /**
      * Dashboard Super Admin
      */
@@ -210,12 +234,34 @@ class DashboardController extends Controller
         $data = $request->validate([
             'settings' => ['required', 'array'],
             'settings.*' => ['nullable', 'string', 'max:255'],
+            'app_logo' => ['nullable', 'image', 'max:2048'], // Maksimum 2MB
         ]);
 
         foreach ($data['settings'] as $key => $value) {
             Setting::updateOrCreate(
                 ['key' => $key],
                 ['value' => $value, 'group' => str_starts_with($key, 'company_') ? 'company' : 'app']
+            );
+        }
+
+        if ($request->hasFile('app_logo')) {
+            $file = $request->file('app_logo');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('logos'), $filename);
+            $path = 'logos/' . $filename;
+            
+            // Delete old logo file if it exists in public directory
+            $oldSetting = Setting::where('key', 'app_logo')->first();
+            if ($oldSetting && $oldSetting->value) {
+                $oldPath = public_path($oldSetting->value);
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+
+            Setting::updateOrCreate(
+                ['key' => 'app_logo'],
+                ['value' => $path, 'group' => 'app']
             );
         }
 
@@ -228,7 +274,7 @@ class DashboardController extends Controller
     public function admin(Request $request, string $section = 'dashboard'): View
     {
         $user = $request->session()->get('auth_user');
-        $branchId = $user['branch_id'] ?? null;
+        $branchId = $this->resolveBranchId($request);
 
         $totalOrdersToday = Order::where('branch_id', $branchId)
             ->whereDate('created_at', today())
@@ -321,7 +367,7 @@ class DashboardController extends Controller
     public function cashier(Request $request, string $section = 'dashboard'): View
     {
         $user = $request->session()->get('auth_user');
-        $branchId = $user['branch_id'] ?? null;
+        $branchId = $this->resolveBranchId($request);
 
         $waitingPayment = Order::where('branch_id', $branchId)
             ->where('status', 'WAITING_PAYMENT')
@@ -341,7 +387,7 @@ class DashboardController extends Controller
 
         $tables = CafeTable::where('branch_id', $branchId)->orderBy('code', 'asc')->get();
 
-        $newOrders = Order::with(['table', 'items.menu', 'items.toppings.topping'])
+        $newOrders = Order::with(['table', 'items.menu', 'items.product', 'items.toppings.topping'])
             ->where('branch_id', $branchId)
             ->where('status', 'WAITING_PAYMENT')
             ->latest()
@@ -356,6 +402,15 @@ class DashboardController extends Controller
             ->take(15)
             ->get();
 
+        $products = [];
+        $menus = [];
+        if ($section === 'kelola-barang') {
+            $products = Product::where('branch_id', $branchId)->latest()->get();
+        } elseif ($section === 'pembayaran' || $section === 'order-masuk') {
+            $products = Product::where('branch_id', $branchId)->where('is_available', true)->latest()->get();
+            $menus = Menu::where('is_available', true)->latest()->get();
+        }
+
         return view('pages.dashboard.cashier', [
             'user' => $user,
             'metrics' => [
@@ -368,6 +423,47 @@ class DashboardController extends Controller
             'newOrders' => $newOrders,
             'payments' => $payments,
             'section' => $section,
+            'products' => $products,
+            'menus' => $menus,
+        ]);
+    }
+
+    /**
+     * Live waiting-payment orders for cashier tab refresh
+     */
+    public function waitingOrders(Request $request): JsonResponse
+    {
+        $user = $request->session()->get('auth_user');
+        $branchId = $this->resolveBranchId($request);
+
+        $orders = Order::with(['table', 'items.menu', 'items.product'])
+            ->where('branch_id', $branchId)
+            ->where('status', 'WAITING_PAYMENT')
+            ->latest()
+            ->get()
+            ->map(function (Order $order) {
+                return [
+                    'id' => $order->id,
+                    'invoice_number' => $order->invoice_number,
+                    'table_code' => $order->table ? $order->table->code : null,
+                    'table_label' => $order->table ? 'Meja ' . $order->table->code : 'Tanpa Meja (Direct)',
+                    'total' => (int) $order->total,
+                    'customer_note' => $order->customer_note,
+                    'items' => $order->items->map(function ($item) {
+                        return [
+                            'name' => $item->menu ? $item->menu->name : ($item->product ? $item->product->name : 'Item'),
+                            'quantity' => (int) $item->quantity,
+                            'unit_price' => (int) $item->unit_price,
+                        ];
+                    })->values(),
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'count' => $orders->count(),
+            'orders' => $orders,
         ]);
     }
 
@@ -377,7 +473,7 @@ class DashboardController extends Controller
     public function barista(Request $request, string $section = 'dashboard'): View
     {
         $user = $request->session()->get('auth_user');
-        $branchId = $user['branch_id'] ?? null;
+        $branchId = $this->resolveBranchId($request);
 
         $queueActive = Order::where('branch_id', $branchId)
             ->where('status', 'PAID')

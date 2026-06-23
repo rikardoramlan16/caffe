@@ -4,6 +4,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderActionController;
 use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\ScannerController;
 use App\Http\Controllers\Admin\InventoryController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\AttendanceController;
@@ -49,6 +51,8 @@ Route::get('/kontak', function () {
 // 2. Authentication Routes for Staff
 Route::get('/staff/login', [AuthController::class, 'login'])->name('login');
 Route::post('/staff/login', [AuthController::class, 'authenticate']);
+Route::get('/staff/login/verify-face', [AuthController::class, 'showVerifyFace'])->name('login.verify-face');
+Route::post('/staff/login/verify-face', [AuthController::class, 'verifyFace']);
 Route::any('/staff/logout', [AuthController::class, 'logout'])->name('logout');
 
 // 3. Customer QR Flow Routes
@@ -131,13 +135,20 @@ Route::middleware('role:owner,super_admin,admin')->group(function () {
 
 // 6. Staff Portal (Self-Service for all staff)
 Route::middleware('role:owner,super_admin,admin,kasir,barista,pelayan')->group(function () {
+    Route::get('/profil', function () {
+        return redirect()->route('staff.profile');
+    })->name('profil');
+
     Route::get('/dashboard/staff/profile', [StaffPortalController::class, 'profile'])->name('staff.profile');
     Route::get('/dashboard/staff/attendance', [StaffPortalController::class, 'attendance'])->name('staff.attendance');
     Route::post('/dashboard/staff/clock-in', [StaffPortalController::class, 'clockIn'])->name('staff.clock-in');
     Route::post('/dashboard/staff/clock-out', [StaffPortalController::class, 'clockOut'])->name('staff.clock-out');
-    Route::post('/dashboard/staff/leave', [StaffPortalController::class, 'storeLeave'])->name('staff.leave.store');
+    Route::post('/dashboard/staff/leave', [StaffPortalController::class, 'storeLeave'])->name('staff.leave.apply');
     Route::get('/dashboard/staff/payroll', [StaffPortalController::class, 'payroll'])->name('staff.payroll');
     Route::get('/dashboard/staff/payroll/{payroll}/slip', [StaffPortalController::class, 'slip'])->name('staff.slip');
+    Route::post('/dashboard/staff/change-password', [StaffPortalController::class, 'changePassword'])->name('staff.change-password');
+    Route::post('/dashboard/staff/register-face', [StaffPortalController::class, 'registerFace'])->name('staff.register-face');
+    Route::post('/dashboard/staff/delete-face', [StaffPortalController::class, 'deleteFace'])->name('staff.delete-face');
 });
 
 // 7. Super Admin Dashboard
@@ -163,17 +174,40 @@ Route::middleware('role:admin')->group(function () {
     
     // Admin menu management
     Route::get('/dashboard/admin/menu', [MenuController::class, 'index'])->name('admin.menu.index');
-    Route::post('/admin/menu', [MenuController::class, 'store'])->name('admin.menu.store');
-    Route::post('/admin/menu/{menu}/update', [MenuController::class, 'update'])->name('admin.menu.update');
-    Route::post('/admin/menu/{menu}/toggle', [MenuController::class, 'toggleStatus'])->name('admin.menu.toggle');
-    Route::delete('/admin/menu/{menu}', [MenuController::class, 'destroy'])->name('admin.menu.destroy');
     Route::post('/admin/menu/{menu}/recipe', [MenuController::class, 'saveRecipe'])->name('admin.menu.recipe');
-    
-    Route::post('/admin/category', [MenuController::class, 'category'])->name('admin.category.store');
     
     Route::post('/admin/topping', [MenuController::class, 'storeTopping'])->name('admin.topping.store');
     Route::post('/admin/topping/{topping}/update', [MenuController::class, 'updateTopping'])->name('admin.topping.update');
     Route::delete('/admin/topping/{topping}', [MenuController::class, 'destroyTopping'])->name('admin.topping.destroy');
+});
+
+// Shared Menu, Product & Category Management (Admin and Cashier/Kasir)
+Route::middleware('role:admin,kasir')->group(function () {
+    Route::post('/admin/menu', [MenuController::class, 'store'])->name('admin.menu.store');
+    Route::get('/admin/menu', function () {
+        return redirect()->route('admin.menu.index');
+    });
+    Route::post('/admin/menu/{menu}/update', [MenuController::class, 'update'])->name('admin.menu.update');
+    Route::post('/admin/menu/{menu}/toggle', [MenuController::class, 'toggleStatus'])->name('admin.menu.toggle');
+    Route::delete('/admin/menu/{menu}', [MenuController::class, 'destroy'])->name('admin.menu.destroy');
+    
+    Route::post('/admin/category', [MenuController::class, 'category'])->name('admin.category.store');
+    Route::get('/admin/category', function () {
+        return redirect()->route('admin.menu.index', ['section' => 'kategori']);
+    });
+
+    // Product (barang) management
+    Route::post('/admin/products', [ProductController::class, 'store'])->name('admin.products.store');
+    Route::get('/admin/products', function (Request $request) {
+        $role = $request->session()->get('auth_user.role');
+        if ($role === 'kasir') {
+            return redirect()->route('dashboard.cashier.section', 'kelola-barang');
+        }
+        return redirect()->route('admin.menu.index', ['section' => 'barang']);
+    });
+    Route::post('/admin/products/{product}/update', [ProductController::class, 'update'])->name('admin.products.update');
+    Route::post('/admin/products/{product}/toggle', [ProductController::class, 'toggleStatus'])->name('admin.products.toggle');
+    Route::delete('/admin/products/{product}', [ProductController::class, 'destroy'])->name('admin.products.destroy');
 });
 
 // Admin & Super Admin Inventory Modifiers
@@ -198,7 +232,14 @@ Route::middleware('role:admin,super_admin,owner,barista')->group(function () {
 // 7. Cashier Dashboard
 Route::middleware('role:kasir')->group(function () {
     Route::get('/dashboard/cashier', [DashboardController::class, 'cashier'])->name('dashboard.cashier');
-    Route::get('/dashboard/cashier/{section}', [DashboardController::class, 'cashier'])->name('dashboard.cashier.section')->where('section', 'order-masuk|pembayaran|riwayat');
+    Route::get('/dashboard/cashier/pembayran', function () {
+        return redirect()->route('dashboard.cashier.section', [
+            'section' => 'pembayaran',
+            'active_tab' => 'antrean',
+        ]);
+    })->name('dashboard.cashier.pembayran');
+    Route::get('/dashboard/cashier/waiting-orders', [DashboardController::class, 'waitingOrders'])->name('dashboard.cashier.waiting-orders');
+    Route::get('/dashboard/cashier/{section}', [DashboardController::class, 'cashier'])->name('dashboard.cashier.section')->where('section', 'order-masuk|pembayaran|riwayat|kelola-barang');
 });
 
 // 8. Barista Dashboard
@@ -212,5 +253,18 @@ Route::middleware('role:super_admin,admin,kasir,barista')->group(function () {
     Route::post('/orders/{order}/status', [OrderActionController::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{order}/payment', [OrderActionController::class, 'confirmPayment'])->name('orders.payment');
     Route::post('/orders/{order}/move', [OrderActionController::class, 'moveTable'])->name('orders.move');
+    Route::post('/orders/{order}/add-by-barcode', [OrderActionController::class, 'addItemByBarcode'])->name('orders.add-barcode');
+    Route::post('/dashboard/cashier/orders/create-direct', [OrderActionController::class, 'createDirectOrder'])->name('cashier.orders.create-direct');
+    
+    // Scanner pairings generator and checker
+    Route::post('/dashboard/cashier/scanner/generate', [ScannerController::class, 'generateCode'])->name('cashier.scanner.generate');
+    Route::get('/dashboard/cashier/scanner/status', [ScannerController::class, 'checkStatus'])->name('cashier.scanner.status');
 });
 
+// 10. Mobile Scanner paired phone endpoints
+Route::get('/scanner', [ScannerController::class, 'showScanner'])->name('scanner.index');
+Route::post('/scanner/pair', [ScannerController::class, 'pair'])->name('scanner.pair');
+Route::post('/scanner/unpair', [ScannerController::class, 'unpair'])->name('scanner.unpair');
+Route::get('/scanner/orders', [ScannerController::class, 'getActiveOrders'])->name('scanner.orders');
+Route::post('/scanner/scan', [ScannerController::class, 'scan'])->name('scanner.scan');
+Route::post('/scanner/scan-buffer', [ScannerController::class, 'scanBuffer'])->name('scanner.scan-buffer');

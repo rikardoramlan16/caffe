@@ -3,7 +3,7 @@
         <div class="app-layout">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">CF</span><span>Kopi Senja</span></a>
+                <a class="brand" href="{{ route('landing') }}"><span class="brand-mark">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span><span>Kopi Senja</span></a>
                 <nav class="side-nav" aria-label="Navigasi Sidebar">
                     @if ($authUser['role'] === 'owner')
                         <a href="{{ route('dashboard.owner') }}">📊 Dashboard</a>

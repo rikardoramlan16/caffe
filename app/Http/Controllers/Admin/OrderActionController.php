@@ -101,4 +101,128 @@ class OrderActionController extends Controller
 
         return back()->with('success', 'Meja pelanggan berhasil dipindahkan.');
     }
+
+    public function addItemByBarcode(Request $request, Order $order): RedirectResponse
+    {
+        $data = $request->validate([
+            'barcode' => ['required', 'string']
+        ]);
+
+        // Find the product item by barcode
+        $product = \App\Models\Product::where('barcode', $data['barcode'])->first();
+        if (!$product) {
+            return back()->with('error', 'Produk dengan barcode "' . $data['barcode'] . '" tidak ditemukan.');
+        }
+
+        if (!$product->is_available) {
+            return back()->with('error', 'Produk "' . $product->name . '" sedang tidak tersedia.');
+        }
+
+        // Add or increment the item in the order
+        $orderItem = \App\Models\OrderItem::where('order_id', $order->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if ($orderItem) {
+            $orderItem->increment('quantity');
+        } else {
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $product->id,
+                'quantity' => 1,
+                'unit_price' => $product->price,
+                'size' => 'Regular',
+                'size_price' => 0,
+                'sugar_level' => '100%',
+                'ice_level' => 'Normal',
+            ]);
+        }
+
+        // Recalculate totals
+        $subtotal = \App\Models\OrderItem::where('order_id', $order->id)
+            ->get()
+            ->reduce(fn($sum, $item) => $sum + ($item->unit_price + $item->size_price) * $item->quantity, 0);
+            
+        $total = $subtotal + $order->service_fee;
+
+        $order->update([
+            'subtotal' => $subtotal,
+            'total' => $total
+        ]);
+
+        return back()->with('success', 'Produk "' . $product->name . '" berhasil ditambahkan ke pesanan.');
+    }
+
+    public function createDirectOrder(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'table_id' => ['nullable', 'exists:tables,id'],
+            'customer_note' => ['nullable', 'string'],
+            'items' => ['required', 'array'],
+            'items.*.product_id' => ['nullable', 'exists:products,id'],
+            'items.*.menu_id' => ['nullable', 'exists:menus,id'],
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $user = $request->session()->get('auth_user');
+        $branchId = $user['branch_id'] ?? \App\Models\Branch::first()?->id;
+
+        $invoiceNumber = 'INV-' . now()->format('ymd') . '-' . str_pad((string) rand(1, 9999), 4, '0', STR_PAD_LEFT);
+        $serviceFee = intval(\App\Models\Setting::where('key', 'service_fee')->first()?->value ?? 0);
+
+        \DB::beginTransaction();
+        try {
+            $order = Order::create([
+                'branch_id' => $branchId,
+                'table_id' => $data['table_id'] ?? null,
+                'customer_session_id' => null,
+                'invoice_number' => $invoiceNumber,
+                'status' => 'WAITING_PAYMENT',
+                'subtotal' => 0,
+                'service_fee' => $serviceFee,
+                'total' => $serviceFee,
+                'customer_note' => $data['customer_note'] ?? null,
+            ]);
+
+            $subtotal = 0;
+            foreach ($data['items'] as $item) {
+                $price = 0;
+                $productId = $item['product_id'] ?? null;
+                $menuId = $item['menu_id'] ?? null;
+
+                if ($productId) {
+                    $product = \App\Models\Product::find($productId);
+                    $price = $product->price;
+                } elseif ($menuId) {
+                    $menu = \App\Models\Menu::find($menuId);
+                    $price = $menu->price;
+                }
+
+                \App\Models\OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $productId,
+                    'menu_id' => $menuId,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $price,
+                    'size' => 'Regular',
+                    'size_price' => 0,
+                    'sugar_level' => '100%',
+                    'ice_level' => 'Normal',
+                ]);
+
+                $subtotal += $price * $item['quantity'];
+            }
+
+            $order->update([
+                'subtotal' => $subtotal,
+                'total' => $subtotal + $serviceFee
+            ]);
+
+            \DB::commit();
+            return back()->with('success', 'Order ' . $invoiceNumber . ' berhasil dibuat!');
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return back()->with('error', 'Gagal membuat order: ' . $e->getMessage());
+        }
+    }
 }

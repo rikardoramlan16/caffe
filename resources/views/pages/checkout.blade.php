@@ -5,7 +5,7 @@
                 <div class="mobile-top" style="background: var(--coffee-deep); color: white; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;">
                     <div>
                         <a class="brand" href="{{ route('landing') }}" style="display: flex; align-items: center; gap: 8px;">
-                            <span class="brand-mark" style="width: 32px; height: 32px; font-size: 14px;">CF</span>
+                            <span class="brand-mark" style="width: 32px; height: 32px; font-size: 14px;">@if(!empty($appLogo))<img src="{{ asset($appLogo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">@else CF @endif</span>
                             <span style="font-size: 14px; font-weight: 800; color: white;">Checkout</span>
                         </a>
                     </div>
@@ -73,7 +73,7 @@
                             </div>
                             <div style="display:flex; justify-content:space-between; margin-bottom: 8px; font-size: 13px;">
                                 <span class="muted">Biaya Layanan</span>
-                                <strong>Rp 8.000</strong>
+                                <strong>Rp {{ number_format($serviceFee, 0, ',', '.') }}</strong>
                             </div>
                             <div style="display:flex; justify-content:space-between; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px; margin-top: 10px; font-size: 16px;">
                                 <span style="font-weight: 700; color: var(--text-main);">Total Bayar</span>
@@ -116,6 +116,13 @@
                 try { cart = JSON.parse(storedCart); } catch (e) { cart = []; }
             }
             renderCheckoutItems();
+            
+            // Populate general note from localStorage
+            const generalNote = localStorage.getItem('cafeflow_general_note') || '';
+            const generalNoteInput = document.getElementById('general-note');
+            if (generalNoteInput) {
+                generalNoteInput.value = generalNote;
+            }
         });
 
         function renderCheckoutItems() {
@@ -148,7 +155,7 @@
             });
 
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const serviceFee = 8000;
+            const serviceFee = {{ $serviceFee }};
             const total = subtotal + serviceFee;
             
             document.getElementById('subtotal-val').innerText = `Rp ${subtotal.toLocaleString('id-ID')}`;
@@ -188,6 +195,7 @@
                     // Clear cart
                     cart = [];
                     localStorage.setItem('cafeflow_cart', JSON.stringify(cart));
+                    localStorage.removeItem('cafeflow_general_note');
                     
                     // Save invoice number for status page
                     localStorage.setItem('cafeflow_active_invoice', data.invoice);
