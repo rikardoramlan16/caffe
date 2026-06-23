@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Pelanggan scan QR di meja">
+  <rect width="1200" height="800" fill="#fbf7ef"/>
+  <rect x="120" y="470" width="960" height="120" rx="18" fill="#6f4e37"/>
+  <circle cx="430" cy="280" r="70" fill="#c79a4b"/>
+  <rect x="360" y="350" width="140" height="180" rx="44" fill="#3d2416"/>
+  <rect x="610" y="250" width="180" height="320" rx="22" fill="#171412"/>
+  <rect x="630" y="280" width="140" height="240" rx="12" fill="#fff"/>
+  <rect x="840" y="380" width="150" height="150" rx="12" fill="#fff" stroke="#3d2416" stroke-width="10"/>
+  <path d="M872 415h34v34h-34zm58 0h34v34h-34zm-58 58h34v34h-34zm58 58h34v-34h-34z" fill="#171412"/>
+</svg>

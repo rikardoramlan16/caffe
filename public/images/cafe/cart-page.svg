@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-label="Cart mobile page mockup">
+  <rect width="900" height="1200" fill="#fbf7ef"/>
+  <rect x="250" y="70" width="400" height="1060" rx="30" fill="#fff" stroke="#e6d8c2"/>
+  <text x="300" y="170" font-family="Arial" font-size="40" font-weight="700" fill="#3d2416">Cart</text>
+  <rect x="300" y="230" width="300" height="110" rx="14" fill="#f4ead8"/>
+  <rect x="300" y="370" width="300" height="110" rx="14" fill="#f4ead8"/>
+  <rect x="300" y="760" width="300" height="210" rx="14" fill="#3d2416"/>
+  <rect x="325" y="890" width="250" height="58" rx="10" fill="#c79a4b"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="700" viewBox="0 0 900 700" role="img" aria-label="Payment popup mockup">
+  <rect width="900" height="700" fill="#171412"/>
+  <rect x="230" y="120" width="440" height="460" rx="18" fill="#fff"/>
+  <text x="290" y="205" font-family="Arial" font-size="38" font-weight="700" fill="#3d2416">Pembayaran</text>
+  <rect x="300" y="250" width="300" height="130" rx="12" fill="#f4ead8"/>
+  <rect x="300" y="430" width="130" height="62" rx="10" fill="#3d2416"/>
+  <rect x="470" y="430" width="130" height="62" rx="10" fill="#c79a4b"/>
+</svg>

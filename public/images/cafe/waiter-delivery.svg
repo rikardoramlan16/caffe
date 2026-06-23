@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Pelayan mengantar minuman">
+  <rect width="1200" height="800" fill="#fbf7ef"/>
+  <circle cx="420" cy="260" r="72" fill="#c79a4b"/>
+  <rect x="350" y="340" width="140" height="210" rx="46" fill="#3d2416"/>
+  <path d="M505 390h300" stroke="#3d2416" stroke-width="26" stroke-linecap="round"/>
+  <rect x="760" y="300" width="170" height="95" rx="16" fill="#6f4e37"/>
+  <path d="M790 300v-70h38v70m52 0v-90h38v90" stroke="#c79a4b" stroke-width="18"/>
+  <rect x="760" y="520" width="260" height="80" rx="16" fill="#f4ead8" stroke="#e6d8c2"/>
+</svg>

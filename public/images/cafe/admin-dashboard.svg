@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Admin dashboard mockup">
+  <rect width="1200" height="800" fill="#fbf7ef"/>
+  <rect x="80" y="70" width="1040" height="660" rx="16" fill="#fff" stroke="#e6d8c2"/>
+  <text x="130" y="150" font-family="Arial" font-size="44" font-weight="700" fill="#3d2416">Dashboard Admin Cabang</text>
+  <rect x="130" y="205" width="260" height="130" rx="12" fill="#f4ead8"/>
+  <rect x="420" y="205" width="260" height="130" rx="12" fill="#f4ead8"/>
+  <rect x="710" y="205" width="260" height="130" rx="12" fill="#f4ead8"/>
+  <rect x="130" y="380" width="520" height="250" rx="12" fill="#3d2416"/>
+  <rect x="690" y="380" width="280" height="250" rx="12" fill="#f4ead8"/>
+  <text x="160" y="455" font-family="Arial" font-size="28" fill="#fffaf0">Order aktif dan grafik penjualan</text>
+</svg>

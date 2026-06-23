@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-label="Halaman pelanggan mobile mockup">
+  <rect width="900" height="1200" fill="#fbf7ef"/>
+  <rect x="270" y="70" width="360" height="1060" rx="34" fill="#171412"/>
+  <rect x="292" y="112" width="316" height="976" rx="20" fill="#fff"/>
+  <text x="322" y="190" font-family="Arial" font-size="32" font-weight="700" fill="#3d2416">Menu Digital</text>
+  <rect x="322" y="240" width="256" height="118" rx="14" fill="#f4ead8"/>
+  <rect x="322" y="382" width="256" height="118" rx="14" fill="#f4ead8"/>
+  <rect x="322" y="524" width="256" height="118" rx="14" fill="#f4ead8"/>
+  <rect x="322" y="912" width="256" height="70" rx="12" fill="#3d2416"/>
+</svg>

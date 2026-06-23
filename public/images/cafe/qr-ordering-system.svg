@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="QR code ordering system">
+  <rect width="1200" height="800" fill="#fbf7ef"/>
+  <rect x="140" y="160" width="300" height="300" rx="18" fill="#fff" stroke="#3d2416" stroke-width="14"/>
+  <path d="M190 215h70v70h-70zm130 0h70v70h-70zM190 345h70v70h-70zm130 130h70v-70h-70zm-52-52h45v-45h-45z" fill="#171412"/>
+  <path d="M500 310h160m0 0l-48-48m48 48l-48 48" stroke="#c79a4b" stroke-width="22" fill="none" stroke-linecap="round"/>
+  <rect x="720" y="120" width="320" height="560" rx="28" fill="#171412"/>
+  <rect x="748" y="170" width="264" height="460" rx="16" fill="#fff"/>
+  <text x="790" y="250" font-family="Arial" font-size="34" font-weight="700" fill="#3d2416">Menu QR</text>
+</svg>

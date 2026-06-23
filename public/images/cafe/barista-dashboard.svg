@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Barista queue dashboard mockup">
+  <rect width="1200" height="800" fill="#171412"/>
+  <text x="96" y="132" font-family="Arial" font-size="52" font-weight="700" fill="#fffaf0">Dashboard Barista</text>
+  <g fill="#2b2119" stroke="#c79a4b"><rect x="96" y="190" width="300" height="470" rx="14"/><rect x="450" y="190" width="300" height="470" rx="14"/><rect x="804" y="190" width="300" height="470" rx="14"/></g>
+  <text x="130" y="252" font-family="Arial" font-size="30" fill="#e0b766">Queue Pesanan</text>
+  <text x="484" y="252" font-family="Arial" font-size="30" fill="#e0b766">Sedang Dibuat</text>
+  <text x="838" y="252" font-family="Arial" font-size="30" fill="#e0b766">Siap Diantar</text>
+</svg>

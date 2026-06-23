@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Multi branch management">
+  <rect width="1200" height="800" fill="#171412"/>
+  <text x="110" y="140" font-family="Arial" font-size="50" font-weight="700" fill="#fffaf0">Multi Branch Management</text>
+  <circle cx="600" cy="400" r="78" fill="#c79a4b"/>
+  <g fill="#2b2119" stroke="#c79a4b" stroke-width="8"><rect x="120" y="260" width="220" height="150" rx="16"/><rect x="860" y="260" width="220" height="150" rx="16"/><rect x="260" y="560" width="220" height="150" rx="16"/><rect x="720" y="560" width="220" height="150" rx="16"/></g>
+  <path d="M522 400H340m338 0h182M560 470L480 560m160-90l80 90" stroke="#c79a4b" stroke-width="14" fill="none"/>
+</svg>

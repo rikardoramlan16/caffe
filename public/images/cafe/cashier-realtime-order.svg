@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Kasir menerima order realtime">
+  <rect width="1200" height="800" fill="#f4ead8"/>
+  <rect x="100" y="100" width="640" height="500" rx="20" fill="#fff"/>
+  <text x="145" y="180" font-family="Arial" font-size="46" font-weight="700" fill="#3d2416">Order Realtime</text>
+  <rect x="150" y="240" width="520" height="86" rx="12" fill="#fbf7ef"/>
+  <rect x="150" y="350" width="520" height="86" rx="12" fill="#fbf7ef"/>
+  <rect x="150" y="460" width="520" height="86" rx="12" fill="#fbf7ef"/>
+  <circle cx="890" cy="300" r="72" fill="#c79a4b"/>
+  <rect x="820" y="370" width="140" height="180" rx="42" fill="#3d2416"/>
+</svg>

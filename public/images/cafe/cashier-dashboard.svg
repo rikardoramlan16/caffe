@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Kasir realtime order mockup">
+  <rect width="1200" height="800" fill="#fff"/>
+  <rect x="84" y="72" width="1032" height="656" rx="16" fill="#fbf7ef" stroke="#e6d8c2"/>
+  <text x="132" y="142" font-family="Arial" font-size="44" font-weight="700" fill="#3d2416">Dashboard Kasir</text>
+  <g fill="#fff" stroke="#e6d8c2"><rect x="132" y="190" width="300" height="430" rx="12"/><rect x="462" y="190" width="300" height="430" rx="12"/><rect x="792" y="190" width="260" height="430" rx="12"/></g>
+  <text x="164" y="252" font-family="Arial" font-size="28" fill="#6f4e37">Order Masuk</text>
+  <text x="494" y="252" font-family="Arial" font-size="28" fill="#6f4e37">Menunggu Pembayaran</text>
+  <text x="824" y="252" font-family="Arial" font-size="28" fill="#6f4e37">Cetak Struk</text>
+</svg>

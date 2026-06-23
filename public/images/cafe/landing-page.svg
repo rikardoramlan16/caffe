@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Landing page mockup CafeFlow">
+  <rect width="1200" height="800" fill="#fbf7ef"/>
+  <rect x="72" y="64" width="1056" height="672" rx="18" fill="#fff" stroke="#e6d8c2"/>
+  <text x="120" y="152" font-family="Arial" font-size="56" font-weight="700" fill="#3d2416">CafeFlow Landing Page</text>
+  <text x="120" y="206" font-family="Arial" font-size="24" fill="#74685d">Hero, fitur unggulan, cara kerja, preview dashboard, statistik, testimoni, FAQ.</text>
+  <rect x="120" y="268" width="420" height="300" rx="16" fill="#3d2416"/>
+  <rect x="590" y="268" width="430" height="300" rx="16" fill="#f4ead8" stroke="#c79a4b"/>
+  <rect x="626" y="312" width="130" height="70" rx="10" fill="#fff"/>
+  <rect x="778" y="312" width="130" height="70" rx="10" fill="#fff"/>
+  <rect x="626" y="410" width="282" height="104" rx="10" fill="#fff"/>
+  <path d="M650 486h42v-38h42v38h42v-72h42v72h42v-52h42v52" stroke="#c79a4b" stroke-width="12" fill="none"/>
+  <circle cx="250" cy="390" r="80" fill="#c79a4b"/>
+  <path d="M207 388h86c0 44-23 76-56 76s-56-32-56-76h26z" fill="#fffaf0"/>
+  <path d="M294 396c42 2 42 52 0 56" stroke="#fffaf0" stroke-width="18" fill="none"/>
+</svg>

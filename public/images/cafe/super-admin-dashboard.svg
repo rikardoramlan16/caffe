@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Super admin dashboard mockup">
+  <rect width="1200" height="800" fill="#171412"/>
+  <rect x="70" y="58" width="220" height="684" rx="16" fill="#3d2416"/>
+  <rect x="322" y="58" width="808" height="684" rx="16" fill="#fbf7ef"/>
+  <text x="350" y="124" font-family="Arial" font-size="42" font-weight="700" fill="#3d2416">Super Admin</text>
+  <g fill="#fff" stroke="#e6d8c2"><rect x="350" y="170" width="170" height="110" rx="12"/><rect x="540" y="170" width="170" height="110" rx="12"/><rect x="730" y="170" width="170" height="110" rx="12"/><rect x="920" y="170" width="170" height="110" rx="12"/></g>
+  <rect x="350" y="320" width="470" height="310" rx="12" fill="#fff" stroke="#e6d8c2"/>
+  <rect x="850" y="320" width="240" height="310" rx="12" fill="#fff" stroke="#e6d8c2"/>
+  <path d="M390 566h48v-90h48v90h48V430h48v136h48v-178h48v178h48v-116h48v116" stroke="#c79a4b" stroke-width="18" fill="none"/>
+</svg>

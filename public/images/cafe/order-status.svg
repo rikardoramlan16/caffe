@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-label="Order status mobile page mockup">
+  <rect width="900" height="1200" fill="#171412"/>
+  <rect x="250" y="80" width="400" height="1040" rx="30" fill="#2b2119" stroke="#c79a4b"/>
+  <text x="300" y="180" font-family="Arial" font-size="38" font-weight="700" fill="#fffaf0">Status Pesanan</text>
+  <g fill="#3d2416" stroke="#c79a4b"><rect x="300" y="260" width="300" height="88" rx="12"/><rect x="300" y="380" width="300" height="88" rx="12"/><rect x="300" y="500" width="300" height="88" rx="12"/><rect x="300" y="620" width="300" height="88" rx="12"/></g>
+</svg>

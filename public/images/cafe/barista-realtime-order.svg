@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-label="Barista menerima order realtime">
+  <rect width="1200" height="800" fill="#171412"/>
+  <rect x="96" y="110" width="520" height="500" rx="20" fill="#2b2119" stroke="#c79a4b"/>
+  <text x="140" y="190" font-family="Arial" font-size="44" font-weight="700" fill="#fffaf0">Queue Barista</text>
+  <rect x="150" y="250" width="410" height="76" rx="12" fill="#3d2416"/>
+  <rect x="150" y="355" width="410" height="76" rx="12" fill="#3d2416"/>
+  <rect x="150" y="460" width="410" height="76" rx="12" fill="#3d2416"/>
+  <circle cx="850" cy="310" r="78" fill="#c79a4b"/>
+  <rect x="770" y="395" width="160" height="185" rx="46" fill="#f4ead8"/>
+</svg>
